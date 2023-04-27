@@ -1,0 +1,89 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import tkinter as tk
+
+# Creates the GUI
+root = tk.Tk()
+root.title("The Sign Out Front Simulation")
+
+# Defines the simulation function
+def run_simulation():
+    
+    # Grabs simulation numbers from the user
+    slide_duration = int(slide_duration_input.get())
+    display_duration_mean = int(display_duration_mean_input.get())
+    display_duration_sd = int(display_duration_sd_input.get())
+    num_slides = int(num_slides_input.get())
+    num_simulations = int(num_simulations_input.get())
+    days_per_week = int(days_per_week_input.get())
+
+    # Simulates a single day
+    def simulate_day():
+        display_duration = np.random.normal(display_duration_mean, display_duration_sd)
+        num_displays = int(display_duration // slide_duration)
+        seen_slides = np.random.choice(range(num_slides), num_displays, replace=True)
+        return len(set(seen_slides))
+
+    # Simulates multiple days
+    results = []
+    for i in range(num_simulations):
+        total_slides_seen = 0
+        for j in range(days_per_week):
+            total_slides_seen += simulate_day()
+        results.append(total_slides_seen)
+
+    # Calculates the % of slides seen
+    percentage_seen = (np.mean(results) / num_slides) * 100
+
+    # Updates output label with results
+    output_label.config(text=f"The students on average will see {percentage_seen:.2f}% of the slides.")
+
+    # Creates the graph with the results from the above
+    plt.hist(results, bins=range(num_slides+2), density=True)
+    plt.xlim([0, num_slides+1])
+    plt.xlabel("Number of slides seen")
+    plt.ylabel("Student density")
+    plt.title("Distribution of slides seen")
+    plt.show()
+
+# Adds input fields to the GUI
+slide_duration_label = tk.Label(root, text="Slide duration (seconds):")
+slide_duration_label.grid(row=0, column=0)
+slide_duration_input = tk.Entry(root)
+slide_duration_input.grid(row=0, column=1)
+
+display_duration_mean_label = tk.Label(root, text="Time seen (seconds):")
+display_duration_mean_label.grid(row=1, column=0)
+display_duration_mean_input = tk.Entry(root)
+display_duration_mean_input.grid(row=1, column=1)
+
+display_duration_sd_label = tk.Label(root, text="Time seen sd (seconds):")
+display_duration_sd_label.grid(row=2, column=0)
+display_duration_sd_input = tk.Entry(root)
+display_duration_sd_input.grid(row=2, column=1)
+
+num_slides_label = tk.Label(root, text="Number of slides:")
+num_slides_label.grid(row=3, column=0)
+num_slides_input = tk.Entry(root)
+num_slides_input.grid(row=3, column=1)
+
+days_per_week_label = tk.Label(root, text="Days per week:")
+days_per_week_label.grid(row=4, column=0)
+days_per_week_input = tk.Entry(root)
+days_per_week_input.grid(row=4, column=1)
+
+num_simulations_label = tk.Label(root, text="Number of simulations:")
+num_simulations_label.grid(row=5, column=0)
+num_simulations_input = tk.Entry(root)
+num_simulations_input.grid(row=5, column=1)
+
+# Adds a button to run program
+simulate_button = tk.Button(root, text="Simulate", command=run_simulation)
+simulate_button.grid(row=6, column=0, columnspan=2)
+
+# Adds an output label for the result
+output_label = tk.Label(root, text="")
+output_label.grid(row=7, column=0, columnspan=2)
+
+# Starts the GUI
+root.mainloop()
